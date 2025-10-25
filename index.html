@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vizio TV Browser</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #000;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  header {
+    background: #111;
+    padding: 15px;
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #222;
+    padding: 10px;
+  }
+  #url {
+    width: 90%;
+    padding: 10px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    margin-bottom: 10px;
+  }
+  button {
+    padding: 10px 15px;
+    font-size: 1em;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1e90ff;
+    color: white;
+    cursor: pointer;
+  }
+  iframe {
+    flex: 1;
+    border: none;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+<header>Vizio TV Browser</header>
+
+<div class="controls">
+  <input id="url" placeholder="Type URL or search term">
+  <button id="goBtn">Go</button>
+</div>
+
+<iframe id="viewer" src="https://www.google.com"></iframe>
+
+<script>
+// Function to load URL or search
+function loadSite() {
+  const input = document.getElementById('url').value.trim();
+  if (!input) return;
+  let url;
+  if (input.includes('.') || input.startsWith('http')) {
+    url = input.startsWith('http') ? input : 'https://' + input;
+  } else {
+    url = 'https://www.google.com/search?q=' + encodeURIComponent(input);
+  }
+  document.getElementById('viewer').src = url;
+}
+
+// Go button click
+document.getElementById('goBtn').addEventListener('click', loadSite);
+
+// TV remote key handling
+let inputFocused = false;
+const urlInput = document.getElementById('url');
+urlInput.focus();
+inputFocused = true;
+
+document.addEventListener('keydown', function(e) {
+  switch(e.key) {
+    case "ArrowUp":
+      if (!inputFocused) scrollIframe('up');
+      break;
+    case "ArrowDown":
+      if (!inputFocused) scrollIframe('down');
+      break;
+    case "ArrowLeft":
+      if (!inputFocused) scrollIframe('left');
+      break;
+    case "ArrowRight":
+      if (!inputFocused) scrollIframe('right');
+      break;
+    case "Enter":
+      if (inputFocused) loadSite();
+      break;
+    case "Tab":
+      // Toggle focus between input and iframe
+      inputFocused = !inputFocused;
+      if(inputFocused) urlInput.focus();
+      else urlInput.blur();
+      e.preventDefault();
+      break;
+  }
+});
+
+// Scroll iframe function
+function scrollIframe(direction) {
+  const iframe = document.getElementById('viewer');
+  const step = 50;
+  try {
+    const doc = iframe.contentWindow.document;
+    switch(direction){
+      case 'up': iframe.contentWindow.scrollBy(0,-step); break;
+      case 'down': iframe.contentWindow.scrollBy(0,step); break;
+      case 'left': iframe.contentWindow.scrollBy(-step,0); break;
+      case 'right': iframe.contentWindow.scrollBy(step,0); break;
+    }
+  } catch(e) {
+    // If cross-origin, scroll iframe element itself
+    switch(direction){
+      case 'up': iframe.scrollBy(0,-step); break;
+      case 'down': iframe.scrollBy(0,step); break;
+      case 'left': iframe.scrollBy(-step,0); break;
+      case 'right': iframe.scrollBy(step,0); break;
+    }
+  }
+}
+</script>
+</body>
+</html>
